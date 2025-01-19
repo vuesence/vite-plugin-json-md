@@ -84,7 +84,7 @@ export function jsonMdPlugin(options: JsonMdPluginOptions): Plugin {
     markdownDir,
     outputDir,
     parseMarkdown = true,
-    convertToJson = false,
+    convertToJson = true,
     minify = false,
   } = options;
 
@@ -99,11 +99,11 @@ export function jsonMdPlugin(options: JsonMdPluginOptions): Plugin {
       ).then((results) => results.flat());
 
       for (const filePath of resolvedFiles) {
-        const content = fs.readFileSync(filePath, "utf-8");
-        const json = JSON5.parse(content);
+        const fileContent = fs.readFileSync(filePath, "utf-8");
+        const parsedData = JSON5.parse(fileContent);
 
-        // Process markdown content in JSON
-        processJsonTree(json);
+        // Обработка markdown в JSON
+        traverseJsonNodes(parsedData, markdownDir, parseMarkdown);
 
         const stringify = convertToJson ? JSON.stringify : JSON5.stringify;
         const relativePath = path.relative(sourceDir, filePath);
@@ -120,40 +120,58 @@ export function jsonMdPlugin(options: JsonMdPluginOptions): Plugin {
         // Write processed file
         fs.writeFileSync(
           finalOutputPath,
-          minify ? stringify(json) : stringify(json, null, 2),
+          minify ? stringify(parsedData) : stringify(parsedData, null, 2),
         );
       }
     },
   };
+}
 
-  /**
-   * Recursively processes markdown content in JSON object
-   */
-  function processJsonTree(obj: Record<string, any>): void {
-    if (typeof obj === "object" && obj !== null) {
-      Object.keys(obj).forEach((key) => {
-        if (typeof obj[key] === "string" && obj[key].startsWith("md:")) {
-          obj[key] = processMarkdown(obj[key]);
-        } else if (typeof obj[key] === "object" && obj[key] !== null) {
-          processJsonTree(obj[key]);
-        }
-      });
-    }
+/**
+ * Recursively processes markdown content in JSON object
+ */
+export function traverseJsonNodes(
+  jsonObject: Record<string, any>,
+  markdownDir: string,
+  parseMarkdown: boolean = true,
+): void {
+  if (typeof jsonObject === "object" && jsonObject !== null) {
+    Object.keys(jsonObject).forEach((propertyKey) => {
+      if (
+        typeof jsonObject[propertyKey] === "string" &&
+        jsonObject[propertyKey].startsWith("md:")
+      ) {
+        jsonObject[propertyKey] = handleMarkdownContent(
+          jsonObject[propertyKey],
+          markdownDir,
+          parseMarkdown,
+        );
+      } else if (
+        typeof jsonObject[propertyKey] === "object" &&
+        jsonObject[propertyKey] !== null
+      ) {
+        traverseJsonNodes(jsonObject[propertyKey], markdownDir, parseMarkdown);
+      }
+    });
   }
+}
 
-  /**
-   * Processes markdown content, either inline or from external file
-   */
-  function processMarkdown(content: string): string {
-    // Handle external markdown files
-    if (content.startsWith("md:@")) {
-      const mdPath = path.join(markdownDir, content.slice(4));
-      const mdContent = fs.readFileSync(mdPath, "utf-8");
-      return parseMarkdown ? (marked(mdContent) as string) : mdContent;
-    }
-    // Handle inline markdown
-    return parseMarkdown
-      ? (marked(content.slice(3)) as string)
-      : content.slice(3);
+/**
+ * Processes markdown content, either inline or from external file
+ */
+function handleMarkdownContent(
+  content: string,
+  markdownDir: string,
+  parseMarkdown: boolean,
+): string {
+  // Handle external markdown files
+  if (content.startsWith("md:@")) {
+    const mdPath = path.join(markdownDir, content.slice(4));
+    const mdContent = fs.readFileSync(mdPath, "utf-8");
+    return parseMarkdown ? (marked(mdContent) as string) : mdContent;
   }
+  // Handle inline markdown
+  return parseMarkdown
+    ? (marked(content.slice(3)) as string)
+    : content.slice(3);
 }
