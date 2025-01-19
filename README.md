@@ -1,0 +1,2 @@
+# Html injection Vite plugin
+
