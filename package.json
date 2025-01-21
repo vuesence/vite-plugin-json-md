@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-json-md",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Vite plugin for processing markdown in JSON files",
   "author": "Ruslan Makarov <ruslan.makarov@gmail.com>",
   "license": "MIT",
@@ -36,7 +36,7 @@
   ],
   "scripts": {
     "build": "vite build",
-    "prepare": "pnpm build",
+    "prepare": "pnpm build && copy index.d.ts dist\\index.d.ts",
     "publish": "pnpm publish --access public"
   },
   "devDependencies": {
