@@ -5,51 +5,82 @@ import type { Plugin } from 'vite';
  */
 export interface JsonMdPluginOptions {
   /**
-   * Glob pattern for JSON files to process
-   * @default '**\/*.json'
+   * Source directory containing JSON/JSON5 files to process
+   * @default ""
    */
-  include?: string | string[];
+  sourceDir?: string;
 
   /**
-   * Glob pattern for JSON files to exclude
-   * @default []
+   * Glob patterns for JSON/JSON5 files to process
+   * @example ["en/*.json5", "fr/*.json5"]
    */
-  exclude?: string | string[];
+  inputFiles: string[];
 
   /**
-   * Custom markdown processing options
+   * Directory containing markdown files referenced in JSON
    */
-  markdownOptions?: {
-    /**
-     * Whether to enable HTML rendering
-     * @default true
-     */
-    html?: boolean;
+  markdownDir: string;
 
-    /**
-     * Whether to enable breaks
-     * @default false
-     */
-    breaks?: boolean;
-  };
+  /**
+   * Output directory for processed files
+   */
+  outputDir: string;
+
+  /**
+   * Whether to parse markdown content into HTML
+   * @default true
+   */
+  parseMarkdown?: boolean;
+
+  /**
+   * Whether to convert JSON5/JSONC to standard JSON
+   * @default false
+   */
+  convertToJson?: boolean;
+
+  /**
+   * Whether to minify output files
+   * @default false
+   */
+  minify?: boolean;
 }
 
 /**
- * Traverse and process nodes in a JSON object
- * @param obj The JSON object to traverse
- * @param processor A function to process each node
- * @returns Processed JSON object
+ * Recursively processes markdown content in JSON object
  */
-export function traverseJsonNodes<T = any>(
-  obj: T, 
-  processor: (value: any, key?: string, parent?: any) => any
-): T;
+export function traverseJsonNodes(
+  jsonObject: Record<string, any>,
+  markdownDir: string,
+  parseMarkdown: boolean = true,
+): void;
 
 /**
- * Vite plugin for processing markdown in JSON files
- * @param options Plugin configuration options
- * @returns Vite plugin instance
+ * Vite plugin that processes JSON5/JSONC files and converts markdown content.
+ * Supports:
+ * - Converting JSON5/JSONC to standard JSON
+ * - Processing inline markdown with "md:" prefix
+ * - Including external markdown files with "md:@" prefix
+ * - Minification of output files
+ *
+ * @example
+ * ```ts
+ * // vite.config.ts
+ * import { jsonMdPlugin } from 'vite-plugin-json-md'
+ *
+ * export default defineConfig({
+ *   plugins: [
+ *     jsonMdPlugin({
+ *       sourceDir: 'src/locales',
+ *       inputFiles: ['en/*.json5', 'fr/*.json5'],
+ *       markdownDir: 'src/locales/md',
+ *       outputDir: 'src/locales/out',
+ *       parseMarkdown: true,
+ *       convertToJson: true
+ *     })
+ *   ]
+ * })
+ * ```
  */
 declare function jsonMdPlugin(options?: JsonMdPluginOptions): Plugin;
 
-export { jsonMdPlugin };
+export { jsonMdPlugin, traverseJsonNodes };

@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-json-md",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Vite plugin for processing markdown in JSON files",
   "author": "Ruslan Makarov <ruslan.makarov@gmail.com>",
   "license": "MIT",
