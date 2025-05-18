@@ -48,6 +48,12 @@ export interface JsonMdPluginOptions {
    * @default false
    */
   minify?: boolean;
+
+  /**
+   * Whether to add target="_blank" rel="noopener noreferrer" to all links
+   * @default false
+   */
+  externalLinks?: boolean;
 }
 
 /**
@@ -57,6 +63,7 @@ export interface JsonMdPluginOptions {
  * - Processing inline markdown with "md:" prefix
  * - Including external markdown files with "md:@" prefix
  * - Minification of output files
+ * - Opening links in a new tab (target="_blank")
  *
  * @example
  * ```ts
@@ -71,7 +78,8 @@ export interface JsonMdPluginOptions {
  *       markdownDir: 'src/locales/md',
  *       outputDir: 'src/locales/out',
  *       parseMarkdown: true,
- *       convertToJson: true
+ *       convertToJson: true,
+ *       externalLinks: true
  *     })
  *   ]
  * })
@@ -86,6 +94,7 @@ export function jsonMdPlugin(options: JsonMdPluginOptions): Plugin {
     parseMarkdown = true,
     convertToJson = true,
     minify = false,
+    externalLinks = false,
   } = options;
 
   return {
@@ -103,7 +112,7 @@ export function jsonMdPlugin(options: JsonMdPluginOptions): Plugin {
         const parsedData = JSON5.parse(fileContent);
 
         // Обработка markdown в JSON
-        traverseJsonNodes(parsedData, markdownDir, parseMarkdown);
+        traverseJsonNodes(parsedData, markdownDir, parseMarkdown, externalLinks);
 
         const stringify = convertToJson ? JSON.stringify : JSON5.stringify;
         const relativePath = path.relative(sourceDir, filePath);
@@ -134,6 +143,7 @@ export function traverseJsonNodes(
   jsonObject: Record<string, any>,
   markdownDir: string,
   parseMarkdown: boolean = true,
+  externalLinks: boolean = false,
 ): void {
   if (typeof jsonObject === "object" && jsonObject !== null) {
     Object.keys(jsonObject).forEach((propertyKey) => {
@@ -145,12 +155,13 @@ export function traverseJsonNodes(
           jsonObject[propertyKey],
           markdownDir,
           parseMarkdown,
+          externalLinks,
         );
       } else if (
         typeof jsonObject[propertyKey] === "object" &&
         jsonObject[propertyKey] !== null
       ) {
-        traverseJsonNodes(jsonObject[propertyKey], markdownDir, parseMarkdown);
+        traverseJsonNodes(jsonObject[propertyKey], markdownDir, parseMarkdown, externalLinks);
       }
     });
   }
@@ -163,15 +174,39 @@ function handleMarkdownContent(
   content: string,
   markdownDir: string,
   parseMarkdown: boolean,
+  externalLinks: boolean = false,
 ): string {
+  let mdContent: string;
+  
   // Handle external markdown files
   if (content.startsWith("md:@")) {
     const mdPath = path.join(markdownDir, content.slice(4));
-    const mdContent = fs.readFileSync(mdPath, "utf-8");
-    return parseMarkdown ? (marked(mdContent) as string) : mdContent;
+    mdContent = fs.readFileSync(mdPath, "utf-8");
+  } else {
+    // Handle inline markdown
+    mdContent = content.slice(3);
   }
-  // Handle inline markdown
-  return parseMarkdown
-    ? (marked(content.slice(3)) as string)
-    : content.slice(3);
+  
+  if (!parseMarkdown) {
+    return mdContent;
+  }
+  
+  if (externalLinks) {
+    const renderer = new marked.Renderer();
+
+    renderer.link = function({ href, title, text }) {
+      return `<a href="${href}" target="_blank" rel="noopener noreferrer" ${
+        title ? `title="${title}"` : ""
+      }>${text}</a>`;
+    };
+    marked.setOptions({ renderer });
+  }
+  // Parse markdown to HTML
+  
+  // If external links option is enabled, add target="_blank" and rel="noopener noreferrer" to all links
+  // Use a simple string replacement for all <a> tags
+  // html = html.replace(/<a\s+/g, '<a target="_blank" rel="noopener noreferrer" ');
+  let html = marked.parse(mdContent) as string;
+  
+  return html;
 }

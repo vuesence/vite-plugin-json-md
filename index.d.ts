@@ -43,6 +43,12 @@ export interface JsonMdPluginOptions {
    * @default false
    */
   minify?: boolean;
+
+  /**
+   * Whether to add target="_blank" rel="noopener noreferrer" to all links
+   * @default false
+   */
+  externalLinks?: boolean;
 }
 
 /**
@@ -51,7 +57,8 @@ export interface JsonMdPluginOptions {
 export function traverseJsonNodes(
   jsonObject: Record<string, any>,
   markdownDir: string,
-  parseMarkdown: boolean = true,
+  parseMarkdown?: boolean,
+  externalLinks?: boolean
 ): void;
 
 /**
@@ -75,12 +82,11 @@ export function traverseJsonNodes(
  *       markdownDir: 'src/locales/md',
  *       outputDir: 'src/locales/out',
  *       parseMarkdown: true,
- *       convertToJson: true
+ *       convertToJson: true,
+ *       externalLinks: true
  *     })
  *   ]
  * })
  * ```
  */
-declare function jsonMdPlugin(options?: JsonMdPluginOptions): Plugin;
-
-export { jsonMdPlugin, traverseJsonNodes };
+export function jsonMdPlugin(options: JsonMdPluginOptions): Plugin;

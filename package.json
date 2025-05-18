@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-json-md",
-  "version": "0.7.2",
+  "version": "0.7.5",
   "description": "Vite plugin for processing markdown in JSON files",
   "author": "Ruslan Makarov <ruslan.makarov@gmail.com>",
   "license": "MIT",
@@ -18,9 +18,9 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.cjs"
     }
   },
   "keywords": [
@@ -51,7 +51,7 @@
   "peerDependencies": {
     "vite": ">= 4.0.0",
     "glob": "^11.0.1",
-    "json5": "^2.2.3",
-    "marked": "^14.1.4"
+    "marked": "^14.1.4",
+    "json5": "^2.2.3"
   }
 }

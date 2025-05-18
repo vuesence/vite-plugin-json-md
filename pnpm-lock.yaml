@@ -7,6 +7,16 @@ settings:
 importers:
 
   .:
+    dependencies:
+      glob:
+        specifier: ^11.0.1
+        version: 11.0.1
+      json5:
+        specifier: ^2.2.3
+        version: 2.2.3
+      marked:
+        specifier: ^14.1.4
+        version: 14.1.4
     devDependencies:
       '@sxzz/eslint-config':
         specifier: ^4.6.0
@@ -17,15 +27,6 @@ importers:
       eslint:
         specifier: ^9.18.0
         version: 9.18.0(jiti@2.4.2)
-      glob:
-        specifier: ^11.0.1
-        version: 11.0.1
-      json5:
-        specifier: ^2.2.3
-        version: 2.2.3
-      marked:
-        specifier: ^14.1.4
-        version: 14.1.4
       typescript:
         specifier: ^5.7.3
         version: 5.7.3

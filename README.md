@@ -13,6 +13,7 @@ A Vite plugin that processes markdown content in JSON/JSON5 files. Particularly 
 - Minification options
 - Perfect for i18n translation files containing rich text content
 - Support for both inline markdown and external markdown files
+- Open links in new tabs with target="_blank" rel="noopener noreferrer"
 
 ## Installation
 
@@ -45,7 +46,8 @@ export default defineConfig({
       markdownDir: 'src/locales/md',
       outputDir: 'src/locales/out',
       parseMarkdown: true,
-      convertToJson: true
+      convertToJson: true,
+      externalLinks: true
     })
   ]
 })
@@ -96,7 +98,7 @@ Output file (`src/locales/out/en/messages.json`):
   "welcome": {
     "title": "<h1>Welcome to our platform</h1>",
     "description": "<ul><li>Feature One</li><li>Feature Two</li><li>Feature Three</li></ul>",
-    "privacyPolicy": "<h1>Privacy Policy</h1><p>We take your privacy seriously:</p><ol><li>We collect minimal data</li><li>Your data is encrypted</li><li>We never share your information</li></ol><p><a href=\"/terms\">Learn more about our terms</a></p>",
+    "privacyPolicy": "<h1>Privacy Policy</h1><p>We take your privacy seriously:</p><ol><li>We collect minimal data</li><li>Your data is encrypted</li><li>We never share your information</li></ol><p><a target=\"_blank\" rel=\"noopener noreferrer\" href=\"/terms\">Learn more about our terms</a></p>",
     "simpleText": "This is regular text without markdown"
   },
   "pricing": {
@@ -140,6 +142,7 @@ Template usage:
 | `parseMarkdown` | `boolean` | `true` | Whether to parse markdown into HTML |
 | `convertToJson` | `boolean` | `false` | Convert JSON5/JSONC to standard JSON |
 | `minify` | `boolean` | `false` | Minify output files |
+| `externalLinks` | `boolean` | `false` | Add target="_blank" rel="noopener noreferrer" to all links |
 
 ## Markdown Processing
 
